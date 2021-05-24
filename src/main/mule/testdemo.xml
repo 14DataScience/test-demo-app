@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:secure-properties="http://www.mulesoft.org/schema/mule/secure-properties"
+	xmlns:jms="http://www.mulesoft.org/schema/mule/jms"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/jms http://www.mulesoft.org/schema/mule/jms/current/mule-jms.xsd
+http://www.mulesoft.org/schema/mule/secure-properties http://www.mulesoft.org/schema/mule/secure-properties/current/mule-secure-properties.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<http:listener-config name="HTTP_Listener_config1" doc:name="HTTP Listener config" doc:id="b8a922a6-bfb8-4895-9f85-c551b5926eba" >
+		<http:listener-connection host="${http.host}" port="${http.port}" />
+	</http:listener-config>
+	<import doc:name="Import" doc:id="71a23d51-14d2-4cf4-9abd-d2767e4c5e0b" file="mule-common-error-handling-utility.xml" />
+	<configuration doc:name="Configuration" doc:id="49d3f7ad-79fc-440e-9cc4-076351dd3bcb" defaultErrorHandler-ref="mule-common-error-handling-utilityError_Handler" />
+	<jms:config name="JMS_Config" doc:name="JMS Config" doc:id="7f87487b-7219-4812-ba0e-b49f74989718" >
+		<jms:active-mq-connection username="${secure::activemq.username}" password="${secure::activemq.password}" >
+			<jms:factory-configuration brokerUrl="tcp://localhost:61616" />
+		</jms:active-mq-connection>
+	</jms:config>
+	<configuration-properties doc:name="Configuration properties" doc:id="2a43c98e-d9f2-44ff-9524-ea7f1b1a2f66" file="${mule.env}.properties" />
+	<secure-properties:config name="Secure_Properties_Config" doc:name="Secure Properties Config" doc:id="4d918af7-4719-4c04-8a4d-b47d6afc498c" file="${mule.env}.properties" key="${secure.key}" >
+		<secure-properties:encrypt algorithm="Blowfish" />
+	</secure-properties:config>
+	<flow name="testdemoFlow" doc:id="d21536a8-829d-45ed-8f5d-a37cbf02b2d4" >
+		<http:listener doc:name="Listener" doc:id="f7697bd6-6acd-4cd2-ba2b-a669f8410530" path="/test" config-ref="HTTP_Listener_config1" allowedMethods="GET">
+			<http:error-response statusCode="#[vars.httpStatusCode default 500]" >
+				<http:body ><![CDATA[#[payload]]]></http:body>
+			</http:error-response>
+		</http:listener>
+		<ee:transform doc:name="Transform Message" doc:id="6e9c0372-47f8-40bf-822b-fb3aa8e7f414">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+[{
+    "id": 1,
+    "firstname": "Tom" ,
+    "LastName": "Cruise" ,
+    "age": 45,
+    "Salary": 45000
+},
+{
+    "id": 2,
+    "firstname": "Maria" ,
+    "LastName": "Sarapova" ,
+    "age": 40,
+    "Salary": 40000
+
+}
+
+
+
+]]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="5ba93483-ccd5-4fd6-acbe-d1d631b41798" message="#[payload]" />
+	</flow>
+</mule>

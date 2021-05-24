@@ -1,0 +1,17 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<types:mule xmlns:types="http://www.mulesoft.org/schema/mule/types">
+  <types:catalog>
+    <types:type name="bookstore" format="xml">
+      <types:example format="xml" element="bookstore" location="examples/bookstore.xml"/>
+    </types:type>
+  </types:catalog>
+  <types:enrichment select="#2f4984ae-a67d-46ec-83e3-60de7607c776">
+    <types:processor-declaration>
+      <types:input-event>
+        <types:message>
+          <types:payload type="bookstore"/>
+        </types:message>
+      </types:input-event>
+    </types:processor-declaration>
+  </types:enrichment>
+</types:mule>
